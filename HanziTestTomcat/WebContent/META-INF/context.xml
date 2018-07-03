@@ -1,0 +1,12 @@
+
+<Context>
+    <Resource
+        name="jdbc/hanzi"
+        auth="Container"
+        type="javax.sql.DataSource"
+        username="yxz297"
+        password="John415"
+        driverClassName="com.mysql.jdbc.Driver"
+        url="jdbc:mysql://localhost:3306/yz?autoReconnect=true"/>
+</Context>
+               
