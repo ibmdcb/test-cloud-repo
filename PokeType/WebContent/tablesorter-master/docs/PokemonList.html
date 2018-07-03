@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Pokemon Go Type Advantage</title>
+
+	<!-- jQuery -->
+	<script src="js/jquery-latest.min.js"></script>
+
+	<!-- Demo stuff -->
+	<link class="ui-theme" rel="stylesheet" href="css/jquery-ui.min.css">
+	<script src="js/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="css/jq.css">
+	<link href="css/prettify.css" rel="stylesheet">
+	<script src="js/prettify.js"></script>
+	<script src="js/docs.js"></script>
+	<style>
+	/* override the vertical-align top in the blue theme */
+	.notes.tablesorter-blue tbody td { vertical-align: middle; }
+	</style>
+
+	<!-- Tablesorter: required -->
+	<link rel="stylesheet" href="../css/theme.blue.css">
+	<script src="../js/jquery.tablesorter.js"></script>
+	<script src="../js/widgets/widget-storage.js"></script>
+	<script src="../js/widgets/widget-filter.js"></script>
+
+	<script id="js">$(function() {
+
+	// call the tablesorter plugin
+	$("#table").tablesorter({
+		theme: 'blue',
+
+		// hidden filter input/selects will resize the columns, so try to minimize the change
+		widthFixed : true,
+
+		// initialize zebra striping and filter widgets
+		widgets: ["zebra", "filter"],
+
+		ignoreCase: false,
+
+		widgetOptions : {
+
+			// filter_anyMatch options was removed in v2.15; it has been replaced by the filter_external option
+
+			// If there are child rows in the table (rows with class name from "cssChildRow" option)
+			// and this option is true and a match is found anywhere in the child row, then it will make that row
+			// visible; default is false
+			filter_childRows : false,
+
+			// if true, filter child row content by column; filter_childRows must also be true
+			filter_childByColumn : false,
+
+			// if true, include matching child row siblings
+			filter_childWithSibs : true,
+
+			// if true, a filter will be added to the top of each table column;
+			// disabled by using -> headers: { 1: { filter: false } } OR add class="filter-false"
+			// if you set this to false, make sure you perform a search using the second method below
+			filter_columnFilters : true,
+
+			// if true, allows using "#:{query}" in AnyMatch searches (column:query; added v2.20.0)
+			filter_columnAnyMatch: true,
+
+			// extra css class name (string or array) added to the filter element (input or select)
+			filter_cellFilter : '',
+
+			// extra css class name(s) applied to the table row containing the filters & the inputs within that row
+			// this option can either be a string (class applied to all filters) or an array (class applied to indexed filter)
+			filter_cssFilter : '', // or []
+
+			// add a default column filter type "~{query}" to make fuzzy searches default;
+			// "{q1} AND {q2}" to make all searches use a logical AND.
+			filter_defaultFilter : {},
+
+			// filters to exclude, per column
+			filter_excludeFilter : {},
+
+			// jQuery selector (or object) pointing to an input to be used to match the contents of any column
+			// please refer to the filter-any-match demo for limitations - new in v2.15
+			filter_external : '',
+
+			// class added to filtered rows (rows that are not showing); needed by pager plugin
+			filter_filteredRow : 'filtered',
+
+			// add custom filter elements to the filter row
+			// see the filter formatter demos for more specifics
+			filter_formatter : null,
+
+			// add custom filter functions using this option
+			// see the filter widget custom demo for more specifics on how to use this option
+			filter_functions : null,
+
+			// hide filter row when table is empty
+			filter_hideEmpty : true,
+
+			// if true, filters are collapsed initially, but can be revealed by hovering over the grey bar immediately
+			// below the header row. Additionally, tabbing through the document will open the filter row when an input gets focus
+			// in v2.26.6, this option will also accept a function
+			filter_hideFilters : true,
+
+			// Set this option to false to make the searches case sensitive
+			filter_ignoreCase : true,
+
+			// if true, search column content while the user types (with a delay).
+			// In v2.27.3, this option can contain an
+			// object with column indexes or classnames; "fallback" is used
+			// for undefined columns
+			filter_liveSearch : true,
+
+			// global query settings ('exact' or 'match'); overridden by "filter-match" or "filter-exact" class
+			filter_matchType : { 'input': 'exact', 'select': 'exact' },
+
+			// a header with a select dropdown & this class name will only show available (visible) options within that drop down.
+			filter_onlyAvail : 'filter-onlyAvail',
+
+			// default placeholder text (overridden by any header "data-placeholder" setting)
+			filter_placeholder : { search : '', select : '' },
+
+			// jQuery selector string of an element used to reset the filters
+			filter_reset : 'button.reset',
+
+			// Reset filter input when the user presses escape - normalized across browsers
+			filter_resetOnEsc : true,
+
+			// Use the $.tablesorter.storage utility to save the most recent filters (default setting is false)
+			filter_saveFilters : true,
+
+			// Delay in milliseconds before the filter widget starts searching; This option prevents searching for
+			// every character while typing and should make searching large tables faster.
+			filter_searchDelay : 300,
+
+			// allow searching through already filtered rows in special circumstances; will speed up searching in large tables if true
+			filter_searchFiltered: true,
+
+			// include a function to return an array of values to be added to the column filter select
+			filter_selectSource  : null,
+
+			// if true, server-side filtering should be performed because client-side filtering will be disabled, but
+			// the ui and events will still be used.
+			filter_serversideFiltering : false,
+
+			// Set this option to true to use the filter to find text from the start of the column
+			// So typing in "a" will find "albert" but not "frank", both have a's; default is false
+			filter_startsWith : false,
+
+			// Filter using parsed content for ALL columns
+			// be careful on using this on date columns as the date is parsed and stored as time in seconds
+			filter_useParsedData : false,
+
+			// data attribute in the header cell that contains the default filter value
+			filter_defaultAttrib : 'data-value',
+
+			// filter_selectSource array text left of the separator is added to the option value, right into the option text
+			filter_selectSourceSeparator : '|'
+
+		}
+
+	});
+
+	// Clear stored filters - added v2.25.6
+	$('.resetsaved').click(function(){
+		$('#table').trigger('filterResetSaved');
+
+		// show quick popup to indicate something happened
+		var $message = $('<span class="results"> Reset</span>').insertAfter(this);
+		setTimeout(function(){
+			$message.remove();
+		}, 500);
+		return false;
+	});
+
+	// External search
+	// buttons set up like this:
+	// <button type="button" data-filter-column="4" data-filter-text="2?%">Saved Search</button>
+	$('button[data-filter-column]').click(function(){
+		/*** first method *** data-filter-column="1" data-filter-text="!son"
+			add search value to Discount column (zero based index) input */
+		var filters = [],
+			$t = $(this),
+			col = $t.data('filter-column'), // zero-based index
+			txt = $t.data('filter-text') || $t.text(); // text to add to filter
+
+		filters[col] = txt;
+		// using "table.hasFilters" here to make sure we aren't targeting a sticky header
+		$.tablesorter.setFilters( $('#table'), filters, true ); // new v2.9
+
+		/** old method (prior to tablsorter v2.9 ***
+		var filters = $('table.tablesorter').find('input.tablesorter-filter');
+		filters.val(''); // clear all filters
+		filters.eq(col).val(txt).trigger('search', false);
+		******/
+
+		/*** second method ***
+			this method bypasses the filter inputs, so the "filter_columnFilters"
+			option can be set to false (no column filters showing)
+		******/
+		/*
+		var columns = [];
+		columns[5] = '2?%'; // or define the array this way [ '', '', '', '', '', '2?%' ]
+		$('table').trigger('search', [ columns ]);
+		*/
+
+		return false;
+	});
+
+});</script>
+
+<script>
+$(function(){
+
+	// *** widgetfilter_startsWith toggle button ***
+	$('button.toggle').click(function(){
+		var c = $('#table')[0].config,
+		$t = $(this),
+		// toggle the boolean
+		fsw = !c.widgetOptions.filter_startsWith,
+		fic = !c.widgetOptions.filter_ignoreCase;
+		if ($t.hasClass('fsw')) {
+			c.widgetOptions.filter_startsWith = fsw;
+			$('#start').html(fsw.toString());
+		} else if ($t.hasClass('fic')) {
+			c.widgetOptions.filter_ignoreCase = fic;
+			$('#case').html(fic.toString());
+		} else {
+			$t = c.$headers.eq(1).toggleClass('filter-match');
+			$t.find('span').html( $t.hasClass('filter-match') ? '' : ' No' );
+		}
+		// update search after option change; add false to trigger to skip search delay
+		c.$table.trigger('search', false);
+		return false;
+	});
+
+});
+</script>
+
+</head>
+<body>
+<div id="banner">
+	<h1>Poke<em>Type</em></h1>
+	<h2>Pokemon Go Type Comparison</h2>
+	<h3>Type effective comparison</h3>
+	<a href="mailto:yang.zzz@gmail.com">Contact Me</a>
+</div>
+<div id="main">
+
+
+	<h1>Pokemon Type Comparison</h1>
+
+	<br>
+CLick to enable <button type="button" data-filter-column="1" data-filter-text="alex|br*|c">Search</button>.
+
+<table id="table" class="tablesorter">
+	<thead>
+		<tr>
+			<!-- you can also add a placeholder using script; $('.tablesorter th:eq(0)').data('placeholder', 'hello') -->
+			<th data-placeholder="" class="filter-false">Rank</th>
+			<th data-placeholder="" class="filter-match">Pokemon Name (<span></span> filter-match )</th>
+			<th data-placeholder="">Move 1</th>
+			<th data-placeholder="">Move 2</th>
+			<th data-placeholder="Try <9.99">Max Deficit</th>
+			<th data-placeholder="">25th Deficit</th> <!-- add class="filter-false" to disable the filter in this column -->
+			<th width= "50%" data-placeholder="Try Poliwrath">Counter Pokemons</th>
+		</tr>
+	</thead>
+	<tbody>
+<tr><td>1</td><td>Tyranitar</td><td>DARK</td><td>ROCK</td><td>-7.0</td><td>-4.5</td><td>MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING HITMONCHAN:FIGHTING,FIGHTING <br>HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tyranitar</td><td>DARK</td><td>FIRE</td><td>-7.0</td><td>-4.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tyranitar</td><td>DARK</td><td>DARK</td><td>-7.0</td><td>-5.0</td><td>HERACROSS:FIGHTING,FIGHTING MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING <br>HITMONCHAN:FIGHTING,FIGHTING HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tyranitar</td><td>STEEL</td><td>ROCK</td><td>-7.0</td><td>-4.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tyranitar</td><td>STEEL</td><td>FIRE</td><td>-7.0</td><td>-4.0</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tyranitar</td><td>STEEL</td><td>DARK</td><td>-7.0</td><td>-4.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>DRAGON</td><td>NORMAL</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>DRAGON</td><td>FLYING</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>DRAGON</td><td>DRAGON</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>STEEL</td><td>NORMAL</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>STEEL</td><td>FLYING</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Dragonite</td><td>STEEL</td><td>DRAGON</td><td>-6.0</td><td>-3.5</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>PSYCHIC</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>PSYCHIC</td><td>STEEL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>GHOST</td><td>NORMAL</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>GHOST</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Snorlax</td><td>GHOST</td><td>STEEL</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>GROUND</td><td>BUG</td><td>-7.5</td><td>-5.5</td><td>MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>GROUND</td><td>GROUND</td><td>-8.0</td><td>-6.0</td><td>MANTINE:WATER,WATER JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>GROUND</td><td>ROCK</td><td>-6.5</td><td>-6.0</td><td>EXEGGUTOR:GRASS,GRASS POLIWRATH:WATER,WATER MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS <br>SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>FIGHTING</td><td>BUG</td><td>-7.0</td><td>-5.0</td><td>MANTINE:WATER,WATER QWILFISH:WATER,WATER AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>FIGHTING</td><td>GROUND</td><td>-7.5</td><td>-6.0</td><td>MANTINE:WATER,WATER JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Rhydon</td><td>FIGHTING</td><td>ROCK</td><td>-6.5</td><td>-6.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS SLOWBRO:WATER,WATER POLIWRATH:WATER,WATER VILEPLUME:GRASS,GRASS <br>STARMIE:WATER,WATER VICTREEBEL:GRASS,GRASS QWILFISH:WATER,WATER AZUMARILL:WATER,WATER <br></td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DARK</td><td>WATER</td><td>-6.5</td><td>-3.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DARK</td><td>DRAGON</td><td>-6.5</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DARK</td><td>DARK</td><td>-6.0</td><td>-2.5</td><td>JOLTEON:ELECTRIC,ELECTRIC AMPHAROS:ELECTRIC,ELECTRIC PORYGON2:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,ELECTRIC ELECTABUZZ:ELECTRIC,ELECTRIC <br>LANTURN:ELECTRIC,ELECTRIC RAICHU:ELECTRIC,ELECTRIC ELECTRODE:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DRAGON</td><td>WATER</td><td>-6.5</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DRAGON</td><td>DRAGON</td><td>-7.0</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Gyarados</td><td>DRAGON</td><td>DARK</td><td>-6.5</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Blissey</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Blissey</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-2.0</td><td>-2.0</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,FIRE TYRANITAR:DARK,DARK TYRANITAR:STEEL,ROCK TYRANITAR:STEEL,FIRE <br>TYRANITAR:STEEL,DARK ALAKAZAM:PSYCHIC,FIGHTING PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING <br>HOUNDOOM:FIRE,FIRE HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE HOUNDOOM:DARK,DARK <br>UMBREON:DARK,DARK HYPNO:PSYCHIC,FIGHTING SNEASEL:ICE,ICE SNEASEL:ICE,DARK <br>SNEASEL:DARK,ICE SNEASEL:DARK,DARK MURKROW:DARK,DARK MURKROW:DARK,FLYING <br>MURKROW:FLYING,DARK MURKROW:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Blissey</td><td>PSYCHIC</td><td>FAIRY</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Blissey</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Blissey</td><td>NORMAL</td><td>PSYCHIC</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Blissey</td><td>NORMAL</td><td>FAIRY</td><td>-2.5</td><td>-1.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Vaporeon</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Donphan</td><td>NORMAL</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Donphan</td><td>NORMAL</td><td>STEEL</td><td>-2.75</td><td>-2.5</td><td>LANTURN:WATER,WATER </td></tr>
+<tr><td>1</td><td>Donphan</td><td>NORMAL</td><td>FAIRY</td><td>-2.5</td><td>-2.0</td><td>OMASTAR:WATER,WATER VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS QWILFISH:WATER,ICE <br>QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Donphan</td><td>FIGHTING</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Donphan</td><td>FIGHTING</td><td>STEEL</td><td>-3.0</td><td>-2.5</td><td>SLOWBRO:WATER,WATER SLOWBRO:WATER,ICE SLOWKING:WATER,ICE STARMIE:WATER,WATER MANTINE:WATER,WATER <br>MANTINE:WATER,ICE QWILFISH:WATER,ICE QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Donphan</td><td>FIGHTING</td><td>FAIRY</td><td>-3.0</td><td>-2.0</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS QWILFISH:WATER,ICE QWILFISH:WATER,WATER <br></td></tr>
+<tr><td>1</td><td>Espeon</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Heracross</td><td>FIGHTING</td><td>FIGHTING</td><td>-7.5</td><td>-4.5</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Heracross</td><td>FIGHTING</td><td>BUG</td><td>-7.5</td><td>-4.25</td><td>CROBAT:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Heracross</td><td>FIGHTING</td><td>GROUND</td><td>-7.75</td><td>-4.75</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Heracross</td><td>BUG</td><td>FIGHTING</td><td>-7.5</td><td>-4.25</td><td>CROBAT:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Heracross</td><td>BUG</td><td>BUG</td><td>-7.5</td><td>-4.5</td><td>CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Heracross</td><td>BUG</td><td>GROUND</td><td>-7.75</td><td>-4.75</td><td>CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Golem</td><td>ROCK</td><td>GROUND</td><td>-6.5</td><td>-6.0</td><td>EXEGGUTOR:GRASS,GRASS POLIWRATH:WATER,WATER MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS <br>SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Golem</td><td>ROCK</td><td>ROCK</td><td>-7.0</td><td>-6.0</td><td>POLIWRATH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Golem</td><td>GROUND</td><td>GROUND</td><td>-8.0</td><td>-6.0</td><td>MANTINE:WATER,WATER JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Golem</td><td>GROUND</td><td>ROCK</td><td>-6.5</td><td>-6.0</td><td>EXEGGUTOR:GRASS,GRASS POLIWRATH:WATER,WATER MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS <br>SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Exeggutor</td><td>GRASS</td><td>GRASS</td><td>-7.5</td><td>-5.5</td><td>SCIZOR:BUG,BUG SCYTHER:BUG,BUG VENOMOTH:BUG,BUG BEEDRILL:BUG,BUG BUTTERFREE:BUG,BUG <br>PARASECT:BUG,BUG ARIADOS:BUG,BUG </td></tr>
+<tr><td>1</td><td>Exeggutor</td><td>GRASS</td><td>PSYCHIC</td><td>-7.25</td><td>-4.25</td><td>SCIZOR:BUG,BUG </td></tr>
+<tr><td>1</td><td>Exeggutor</td><td>PSYCHIC</td><td>GRASS</td><td>-7.25</td><td>-4.25</td><td>SCIZOR:BUG,BUG </td></tr>
+<tr><td>1</td><td>Exeggutor</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-7.0</td><td>-4.0</td><td>SCIZOR:BUG,BUG </td></tr>
+<tr><td>1</td><td>Flareon</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Machamp</td><td>STEEL</td><td>FIGHTING</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Machamp</td><td>STEEL</td><td>STEEL</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC GOLDUCK:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING SKARMORY:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Machamp</td><td>STEEL</td><td>ROCK</td><td>-2.5</td><td>-1.5</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC GOLDUCK:PSYCHIC,PSYCHIC SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Machamp</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Machamp</td><td>FIGHTING</td><td>STEEL</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Machamp</td><td>FIGHTING</td><td>ROCK</td><td>-2.5</td><td>-1.5</td><td>ESPEON:PSYCHIC,PSYCHIC EXEGGUTOR:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,FAIRY SLOWBRO:PSYCHIC,PSYCHIC <br>SLOWKING:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,FAIRY HYPNO:PSYCHIC,PSYCHIC <br>GLIGAR:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Alakazam</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Alakazam</td><td>PSYCHIC</td><td>GHOST</td><td>-3.5</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Alakazam</td><td>PSYCHIC</td><td>FIGHTING</td><td>-3.25</td><td>-2.0</td><td>XATU:DARK,GHOST </td></tr>
+<tr><td>1</td><td>Alakazam</td><td>PSYCHIC</td><td>FAIRY</td><td>-3.0</td><td>-2.0</td><td>SCIZOR:BUG,BUG SCIZOR:BUG,DARK HOUNDOOM:DARK,DARK </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>FIRE</td><td>DARK</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>FIRE</td><td>ELECTRIC</td><td>-3.5</td><td>-2.5</td><td>RHYDON:GROUND,GROUND RHYDON:GROUND,ROCK GOLEM:ROCK,GROUND GOLEM:ROCK,ROCK GOLEM:GROUND,GROUND <br>GOLEM:GROUND,ROCK QUAGSIRE:WATER,GROUND QUAGSIRE:WATER,ROCK QUAGSIRE:GROUND,GROUND <br>QUAGSIRE:GROUND,ROCK </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>FIRE</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>DARK</td><td>FIRE</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Arcanine</td><td>DARK</td><td>ELECTRIC</td><td>-3.0</td><td>-2.0</td><td>RHYDON:GROUND,GROUND RHYDON:GROUND,ROCK GOLEM:ROCK,GROUND GOLEM:ROCK,ROCK GOLEM:GROUND,GROUND <br>GOLEM:GROUND,ROCK SANDSLASH:GROUND,GROUND SANDSLASH:GROUND,ROCK QUAGSIRE:WATER,GROUND <br>QUAGSIRE:WATER,ROCK QUAGSIRE:GROUND,GROUND QUAGSIRE:GROUND,ROCK MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Arcanine</td><td>DARK</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Scizor</td><td>BUG</td><td>BUG</td><td>-7.5</td><td>-4.0</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Scizor</td><td>BUG</td><td>STEEL</td><td>-7.25</td><td>-3.5</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Scizor</td><td>BUG</td><td>DARK</td><td>-6.75</td><td>-3.5</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Scizor</td><td>STEEL</td><td>BUG</td><td>-7.25</td><td>-3.5</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Scizor</td><td>STEEL</td><td>STEEL</td><td>-7.0</td><td>-4.0</td><td>FLAREON:FIRE,FIRE ARCANINE:FIRE,FIRE CHARIZARD:FIRE,FIRE TYPHLOSION:FIRE,FIRE HOUNDOOM:FIRE,FIRE <br>MAGMAR:FIRE,FIRE RAPIDASH:FIRE,FIRE NINETALES:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Scizor</td><td>STEEL</td><td>DARK</td><td>-7.0</td><td>-3.5</td><td>HOUNDOOM:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Pinsir</td><td>BUG</td><td>BUG</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Pinsir</td><td>BUG</td><td>FIGHTING</td><td>-3.5</td><td>-2.5</td><td>CROBAT:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Pinsir</td><td>BUG</td><td>NORMAL</td><td>-3.25</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Pinsir</td><td>FIGHTING</td><td>BUG</td><td>-3.5</td><td>-2.5</td><td>CROBAT:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Pinsir</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-2.5</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING YANMA:FLYING,FLYING YANMA:FLYING,ROCK <br></td></tr>
+<tr><td>1</td><td>Pinsir</td><td>FIGHTING</td><td>NORMAL</td><td>-2.75</td><td>-2.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING YANMA:FLYING,FLYING YANMA:FLYING,ROCK <br></td></tr>
+<tr><td>1</td><td>Ursaring</td><td>STEEL</td><td>FAIRY</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING MAGMAR:FIGHTING,FIRE RAPIDASH:FIGHTING,FIRE RAPIDASH:FIGHTING,GROUND <br></td></tr>
+<tr><td>1</td><td>Ursaring</td><td>STEEL</td><td>FIGHTING</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Ursaring</td><td>STEEL</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Ursaring</td><td>FIGHTING</td><td>FAIRY</td><td>-2.5</td><td>-1.25</td><td>PINSIR:FIGHTING,FIGHTING GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Ursaring</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.0</td><td>-2.0</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Ursaring</td><td>FIGHTING</td><td>NORMAL</td><td>-3.0</td><td>-1.5</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Jolteon</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>WATER</td><td>DARK</td><td>-2.5</td><td>-1.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>DARK</td><td>WATER</td><td>-2.5</td><td>-1.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>DARK</td><td>ICE</td><td>-2.5</td><td>-1.0</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Feraligatr</td><td>DARK</td><td>DARK</td><td>-2.0</td><td>-2.0</td><td>JOLTEON:ELECTRIC,ELECTRIC AMPHAROS:ELECTRIC,ELECTRIC VENUSAUR:GRASS,GRASS PORYGON2:ELECTRIC,ELECTRIC PORYGON2:ELECTRIC,GRASS <br>VILEPLUME:GRASS,GRASS CLEFABLE:ELECTRIC,PSYCHIC CLEFABLE:ELECTRIC,FAIRY VICTREEBEL:GRASS,GRASS <br>MAGNETON:ELECTRIC,ELECTRIC MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS ELECTABUZZ:ELECTRIC,ELECTRIC <br>BELLOSSOM:GRASS,GRASS HITMONCHAN:FIGHTING,ELECTRIC LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>RAICHU:ELECTRIC,ELECTRIC ELECTRODE:ELECTRIC,ELECTRIC JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Muk</td><td>POISON</td><td>POISON</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Muk</td><td>POISON</td><td>DARK</td><td>-2.75</td><td>-1.75</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Muk</td><td>BUG</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>VENOMOTH:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Muk</td><td>BUG</td><td>DARK</td><td>-3.25</td><td>-2.0</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Muk</td><td>GHOST</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>SNORLAX:PSYCHIC,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND NOCTOWL:PSYCHIC,PSYCHIC <br>GIRAFARIG:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Muk</td><td>GHOST</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>SNORLAX:PSYCHIC,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND NOCTOWL:PSYCHIC,PSYCHIC <br></td></tr>
+<tr><td>1</td><td>Kingler</td><td>WATER</td><td>BUG</td><td>-2.5</td><td>-1.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kingler</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kingler</td><td>WATER</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MAGNETON:ELECTRIC,ELECTRIC <br>MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC <br>SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kingler</td><td>STEEL</td><td>BUG</td><td>-3.25</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Kingler</td><td>STEEL</td><td>WATER</td><td>-3.25</td><td>-1.75</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Kingler</td><td>STEEL</td><td>NORMAL</td><td>-3.25</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Kingler</td><td>GROUND</td><td>BUG</td><td>-3.0</td><td>-1.75</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kingler</td><td>GROUND</td><td>WATER</td><td>-3.5</td><td>-2.0</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kingler</td><td>GROUND</td><td>NORMAL</td><td>-3.0</td><td>-1.5</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Ampharos</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Ampharos</td><td>ELECTRIC</td><td>FIGHTING</td><td>-3.0</td><td>-1.5</td><td>SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Charizard</td><td>FIRE</td><td>FIRE</td><td>-7.5</td><td>-3.5</td><td>OMASTAR:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Charizard</td><td>FIRE</td><td>DRAGON</td><td>-6.75</td><td>-3.0</td><td>OMASTAR:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Charizard</td><td>FLYING</td><td>FIRE</td><td>-7.25</td><td>-3.25</td><td>OMASTAR:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Charizard</td><td>FLYING</td><td>DRAGON</td><td>-6.5</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Typhlosion</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Typhlosion</td><td>FIRE</td><td>GRASS</td><td>-2.75</td><td>-1.5</td><td>KINGDRA:WATER,WATER MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Typhlosion</td><td>GHOST</td><td>FIRE</td><td>-3.0</td><td>-2.5</td><td>KANGASKHAN:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Typhlosion</td><td>GHOST</td><td>GRASS</td><td>-3.0</td><td>-2.0</td><td>KANGASKHAN:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Omastar</td><td>WATER</td><td>WATER</td><td>-7.0</td><td>-3.5</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Omastar</td><td>WATER</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Omastar</td><td>GROUND</td><td>WATER</td><td>-7.5</td><td>-3.5</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Omastar</td><td>GROUND</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Omastar</td><td>ROCK</td><td>WATER</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Omastar</td><td>ROCK</td><td>ROCK</td><td>-6.0</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Gengar</td><td>GHOST</td><td>GHOST</td><td>-4.0</td><td>-3.0</td><td>SNORLAX:PSYCHIC,GROUND SNORLAX:GHOST,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND <br>KANGASKHAN:GROUND,DARK NOCTOWL:PSYCHIC,PSYCHIC NOCTOWL:PSYCHIC,GHOST GIRAFARIG:PSYCHIC,PSYCHIC <br>FURRET:DARK,GROUND DUNSPARCE:DARK,GROUND DUNSPARCE:GHOST,GROUND RATICATE:DARK,GROUND <br></td></tr>
+<tr><td>1</td><td>Gengar</td><td>GHOST</td><td>POISON</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:DARK,DARK SNORLAX:PSYCHIC,GROUND SNORLAX:GHOST,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND <br>KANGASKHAN:GROUND,GROUND KANGASKHAN:GROUND,DARK NOCTOWL:PSYCHIC,PSYCHIC NOCTOWL:PSYCHIC,GHOST <br>GIRAFARIG:PSYCHIC,PSYCHIC FURRET:DARK,GROUND DUNSPARCE:DARK,GROUND DUNSPARCE:GHOST,GROUND <br>RATICATE:DARK,GROUND </td></tr>
+<tr><td>1</td><td>Gengar</td><td>GHOST</td><td>FIGHTING</td><td>-3.0</td><td>-2.0</td><td>NOCTOWL:PSYCHIC,PSYCHIC NOCTOWL:PSYCHIC,GHOST GIRAFARIG:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Gengar</td><td>GHOST</td><td>DARK</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:DARK,DARK SNORLAX:PSYCHIC,GROUND SNORLAX:GHOST,GROUND BLISSEY:PSYCHIC,PSYCHIC HOUNDOOM:DARK,DARK <br>TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND KANGASKHAN:GROUND,DARK UMBREON:DARK,DARK <br>NOCTOWL:PSYCHIC,PSYCHIC NOCTOWL:PSYCHIC,GHOST SNEASEL:DARK,DARK FURRET:DARK,GROUND <br>DUNSPARCE:DARK,GROUND DUNSPARCE:GHOST,GROUND RATICATE:DARK,GROUND MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Gengar</td><td>DARK</td><td>GHOST</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:DARK,DARK SNORLAX:PSYCHIC,GROUND SNORLAX:GHOST,GROUND BLISSEY:PSYCHIC,PSYCHIC HOUNDOOM:DARK,DARK <br>TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND KANGASKHAN:GROUND,DARK UMBREON:DARK,DARK <br>NOCTOWL:PSYCHIC,PSYCHIC NOCTOWL:PSYCHIC,GHOST SNEASEL:DARK,DARK FURRET:DARK,GROUND <br>DUNSPARCE:DARK,GROUND DUNSPARCE:GHOST,GROUND RATICATE:DARK,GROUND MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Gengar</td><td>DARK</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Gengar</td><td>DARK</td><td>FIGHTING</td><td>-3.25</td><td>-2.0</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Gengar</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK GRANBULL:DARK,DARK CLEFABLE:PSYCHIC,PSYCHIC UMBREON:DARK,DARK <br>SNEASEL:DARK,DARK TOGETIC:PSYCHIC,GROUND MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>STEEL</td><td>ROCK</td><td>-3.25</td><td>-2.5</td><td>STEELIX:STEEL,STEEL MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>STEEL</td><td>STEEL</td><td>-3.5</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL LANTURN:WATER,WATER LANTURN:WATER,ELECTRIC LANTURN:ELECTRIC,WATER <br>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>STEEL</td><td>NORMAL</td><td>-3.25</td><td>-2.5</td><td>MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>DARK</td><td>ROCK</td><td>-3.0</td><td>-2.0</td><td>MACHAMP:STEEL,STEEL MACHAMP:STEEL,ROCK POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE HITMONCHAN:STEEL,ICE <br>HITMONCHAN:STEEL,ELECTRIC </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>DARK</td><td>STEEL</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE </td></tr>
+<tr><td>1</td><td>Aerodactyl</td><td>DARK</td><td>NORMAL</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:STEEL,ROCK </td></tr>
+<tr><td>1</td><td>Lapras</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS POLIWRATH:FIGHTING,FIGHTING VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS <br>MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC <br>SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Lapras</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:FIGHTING,FIGHTING LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Lapras</td><td>WATER</td><td>DRAGON</td><td>-2.5</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS POLIWRATH:FIGHTING,FIGHTING VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS <br>MAGNETON:ELECTRIC,ELECTRIC MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS <br>LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS AZUMARILL:FIGHTING,FAIRY <br></td></tr>
+<tr><td>1</td><td>Lapras</td><td>ICE</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:FIGHTING,FIGHTING LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Lapras</td><td>ICE</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>OMASTAR:ROCK,ROCK KABUTOPS:FIGHTING,ROCK POLIWRATH:FIGHTING,FIGHTING MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Lapras</td><td>ICE</td><td>DRAGON</td><td>-3.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Venusaur</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING SKARMORY:FLYING,FLYING <br>VENOMOTH:PSYCHIC,PSYCHIC BUTTERFREE:PSYCHIC,PSYCHIC YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Venusaur</td><td>GRASS</td><td>POISON</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>NORMAL</td><td>ELECTRIC</td><td>-2.5</td><td>-1.5</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>NORMAL</td><td>GRASS</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>ELECTRIC</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-3.0</td><td>-2.0</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK DONPHAN:FIGHTING,GROUND DONPHAN:FIGHTING,STEEL <br>DONPHAN:FIGHTING,FAIRY MAROWAK:FIGHTING,GROUND </td></tr>
+<tr><td>1</td><td>Porygon2</td><td>ELECTRIC</td><td>GRASS</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Houndoom</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KABUTOPS:FIGHTING,WATER <br>KABUTOPS:FIGHTING,ROCK KINGDRA:WATER,WATER MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Houndoom</td><td>FIRE</td><td>DARK</td><td>-3.0</td><td>-2.75</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,FIGHTING POLIWRATH:FIGHTING,WATER POLIWRATH:FIGHTING,FIGHTING POLIWRATH:GROUND,WATER <br>POLIWRATH:GROUND,FIGHTING AZUMARILL:WATER,WATER AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Houndoom</td><td>DARK</td><td>FIRE</td><td>-3.0</td><td>-2.75</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,FIGHTING POLIWRATH:FIGHTING,WATER POLIWRATH:FIGHTING,FIGHTING POLIWRATH:GROUND,WATER <br>POLIWRATH:GROUND,FIGHTING AZUMARILL:WATER,WATER AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Houndoom</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>HERACROSS:FIGHTING,FIGHTING HERACROSS:FIGHTING,GROUND MACHAMP:FIGHTING,FIGHTING MACHAMP:FIGHTING,ROCK POLIWRATH:WATER,WATER <br>POLIWRATH:WATER,FIGHTING POLIWRATH:FIGHTING,WATER POLIWRATH:FIGHTING,FIGHTING POLIWRATH:GROUND,WATER <br>POLIWRATH:GROUND,FIGHTING HITMONLEE:FIGHTING,FIGHTING HITMONLEE:FIGHTING,ROCK PRIMEAPE:FIGHTING,FIGHTING <br>HITMONCHAN:FIGHTING,FIGHTING HITMONTOP:FIGHTING,ROCK HITMONTOP:FIGHTING,FIGHTING AZUMARILL:WATER,WATER <br>AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Kabutops</td><td>GROUND</td><td>WATER</td><td>-7.5</td><td>-3.5</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kabutops</td><td>GROUND</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Kabutops</td><td>FIGHTING</td><td>WATER</td><td>-7.0</td><td>-3.5</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Kabutops</td><td>FIGHTING</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kabutops</td><td>BUG</td><td>WATER</td><td>-6.5</td><td>-3.0</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Kabutops</td><td>BUG</td><td>ROCK</td><td>-6.0</td><td>-3.0</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Jynx</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-3.0</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,FIRE TYRANITAR:DARK,DARK TYRANITAR:STEEL,ROCK TYRANITAR:STEEL,FIRE <br>TYRANITAR:STEEL,DARK HOUNDOOM:FIRE,FIRE HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE <br>HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Jynx</td><td>PSYCHIC</td><td>ICE</td><td>-3.5</td><td>-3.0</td><td>HOUNDOOM:FIRE,FIRE HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE HOUNDOOM:DARK,DARK SNEASEL:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Jynx</td><td>PSYCHIC</td><td>FAIRY</td><td>-3.0</td><td>-2.5</td><td>SCIZOR:BUG,BUG SCIZOR:BUG,STEEL SCIZOR:BUG,DARK SCIZOR:STEEL,BUG SCIZOR:STEEL,STEEL <br>SCIZOR:STEEL,DARK HOUNDOOM:FIRE,FIRE HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE <br>HOUNDOOM:DARK,DARK STEELIX:STEEL,STEEL STEELIX:STEEL,DARK FORRETRESS:BUG,STEEL <br>FORRETRESS:BUG,ROCK SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Jynx</td><td>ICE</td><td>PSYCHIC</td><td>-3.5</td><td>-3.0</td><td>HOUNDOOM:FIRE,FIRE HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE HOUNDOOM:DARK,DARK SNEASEL:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Jynx</td><td>ICE</td><td>ICE</td><td>-3.0</td><td>-3.0</td><td>FLAREON:FIRE,FIRE ARCANINE:FIRE,FIRE ARCANINE:FIRE,DARK ARCANINE:DARK,FIRE ARCANINE:DARK,DARK <br>SCIZOR:BUG,BUG SCIZOR:BUG,STEEL SCIZOR:BUG,DARK SCIZOR:STEEL,BUG <br>SCIZOR:STEEL,STEEL SCIZOR:STEEL,DARK FERALIGATR:DARK,DARK KINGLER:STEEL,BUG <br>TYPHLOSION:FIRE,FIRE TYPHLOSION:GHOST,FIRE OMASTAR:ROCK,ROCK HOUNDOOM:FIRE,FIRE <br>HOUNDOOM:FIRE,DARK HOUNDOOM:DARK,FIRE HOUNDOOM:DARK,DARK KABUTOPS:BUG,ROCK <br>BLASTOISE:DARK,STEEL FORRETRESS:BUG,STEEL FORRETRESS:BUG,ROCK MAGMAR:FIRE,FIRE <br>RAPIDASH:FIRE,FIRE NINETALES:DARK,FIRE NINETALES:FIRE,FIRE SNEASEL:DARK,DARK <br>MAGCARGO:FIRE,FIRE MAGCARGO:FIRE,ROCK MAGCARGO:ROCK,FIRE MAGCARGO:ROCK,ROCK <br></td></tr>
+<tr><td>1</td><td>Jynx</td><td>ICE</td><td>FAIRY</td><td>-3.0</td><td>-3.0</td><td>FLAREON:FIRE,FIRE ARCANINE:FIRE,FIRE ARCANINE:FIRE,DARK ARCANINE:DARK,FIRE ARCANINE:DARK,DARK <br>SCIZOR:BUG,BUG SCIZOR:BUG,STEEL SCIZOR:BUG,DARK SCIZOR:STEEL,BUG <br>SCIZOR:STEEL,STEEL SCIZOR:STEEL,DARK TYPHLOSION:FIRE,FIRE TYPHLOSION:GHOST,FIRE <br>FORRETRESS:BUG,STEEL FORRETRESS:BUG,ROCK MAGMAR:FIRE,FIRE RAPIDASH:FIRE,FIRE <br>NINETALES:DARK,FIRE NINETALES:FIRE,FIRE MAGCARGO:FIRE,FIRE MAGCARGO:FIRE,ROCK <br>MAGCARGO:ROCK,FIRE MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Jynx</td><td>NORMAL</td><td>PSYCHIC</td><td>-3.5</td><td>-3.0</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,FIRE TYRANITAR:DARK,DARK TYRANITAR:STEEL,ROCK TYRANITAR:STEEL,FIRE <br>TYRANITAR:STEEL,DARK </td></tr>
+<tr><td>1</td><td>Jynx</td><td>NORMAL</td><td>ICE</td><td>-3.0</td><td>-3.0</td><td>SCIZOR:BUG,BUG SCIZOR:BUG,STEEL SCIZOR:BUG,DARK SCIZOR:STEEL,BUG SCIZOR:STEEL,STEEL <br>SCIZOR:STEEL,DARK OMASTAR:ROCK,ROCK GENGAR:GHOST,GHOST GENGAR:GHOST,DARK <br>GENGAR:DARK,GHOST GENGAR:DARK,DARK KABUTOPS:BUG,ROCK FORRETRESS:BUG,STEEL <br>FORRETRESS:BUG,ROCK MISDREAVUS:GHOST,GHOST MISDREAVUS:GHOST,DARK MAGCARGO:FIRE,FIRE <br>MAGCARGO:FIRE,ROCK MAGCARGO:ROCK,FIRE MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Jynx</td><td>NORMAL</td><td>FAIRY</td><td>-3.5</td><td>-3.0</td><td>GENGAR:GHOST,GHOST GENGAR:GHOST,DARK GENGAR:DARK,GHOST GENGAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Tauros</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Tauros</td><td>NORMAL</td><td>STEEL</td><td>-2.5</td><td>-1.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tauros</td><td>NORMAL</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tauros</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tauros</td><td>PSYCHIC</td><td>STEEL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Tauros</td><td>PSYCHIC</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>GYARADOS:DARK,DARK EXEGGUTOR:GRASS,GRASS FERALIGATR:DARK,DARK VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS <br>VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS TANGELA:BUG,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS PARASECT:BUG,BUG <br>PARASECT:BUG,GRASS JUMPLUFF:BUG,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>FERALIGATR:DARK,DARK LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>WATER</td><td>PSYCHIC</td><td>-3.0</td><td>-2.5</td><td>EXEGGUTOR:GRASS,GRASS UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>PSYCHIC</td><td>WATER</td><td>-3.0</td><td>-2.5</td><td>EXEGGUTOR:GRASS,GRASS UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>PSYCHIC</td><td>ICE</td><td>-3.5</td><td>-2.0</td><td>HOUNDOOM:DARK,DARK SNEASEL:DARK,DARK </td></tr>
+<tr><td>1</td><td>Slowbro</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Slowking</td><td>WATER</td><td>FIRE</td><td>-3.0</td><td>-2.0</td><td>GYARADOS:DARK,DARK FERALIGATR:DARK,DARK LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Slowking</td><td>WATER</td><td>PSYCHIC</td><td>-3.0</td><td>-2.5</td><td>EXEGGUTOR:GRASS,GRASS UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Slowking</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>FERALIGATR:DARK,DARK LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Slowking</td><td>PSYCHIC</td><td>FIRE</td><td>-3.5</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK </td></tr>
+<tr><td>1</td><td>Slowking</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Slowking</td><td>PSYCHIC</td><td>ICE</td><td>-3.5</td><td>-2.0</td><td>HOUNDOOM:DARK,DARK SNEASEL:DARK,DARK </td></tr>
+<tr><td>1</td><td>Cloyster</td><td>ICE</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:FIGHTING,FIGHTING LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Cloyster</td><td>ICE</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>OMASTAR:ROCK,ROCK KABUTOPS:FIGHTING,ROCK POLIWRATH:FIGHTING,FIGHTING MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Crobat</td><td>DARK</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>BLISSEY:PSYCHIC,PSYCHIC PORYGON2:ELECTRIC,ELECTRIC NOCTOWL:PSYCHIC,PSYCHIC STANTLER:PSYCHIC,ELECTRIC SNEASEL:ICE,ICE <br></td></tr>
+<tr><td>1</td><td>Crobat</td><td>DARK</td><td>FLYING</td><td>-2.75</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Crobat</td><td>DARK</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Crobat</td><td>FLYING</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>BLISSEY:PSYCHIC,PSYCHIC PORYGON2:ELECTRIC,ELECTRIC NOCTOWL:PSYCHIC,PSYCHIC STANTLER:PSYCHIC,ELECTRIC GIRAFARIG:PSYCHIC,PSYCHIC <br>GIRAFARIG:PSYCHIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Crobat</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Crobat</td><td>FLYING</td><td>POISON</td><td>-3.75</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Scyther</td><td>BUG</td><td>BUG</td><td>-7.0</td><td>-3.25</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>BUG</td><td>FLYING</td><td>-7.0</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>BUG</td><td>DARK</td><td>-6.5</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>FLYING</td><td>BUG</td><td>-7.0</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>FLYING</td><td>FLYING</td><td>-7.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>FLYING</td><td>DARK</td><td>-6.5</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>STEEL</td><td>BUG</td><td>-6.5</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>STEEL</td><td>FLYING</td><td>-6.5</td><td>-3.0</td><td>OMASTAR:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Scyther</td><td>STEEL</td><td>DARK</td><td>-6.0</td><td>-3.0</td><td>OMASTAR:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>FIGHTING</td><td>GROUND</td><td>-3.0</td><td>-1.75</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>FIGHTING</td><td>DRAGON</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING GRANBULL:DARK,FIGHTING AZUMARILL:FIGHTING,WATER AZUMARILL:FIGHTING,FAIRY <br>AZUMARILL:FIGHTING,ICE </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>FIGHTING</td><td>DARK</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>GROUND</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>GROUND</td><td>DRAGON</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Kangaskhan</td><td>GROUND</td><td>DARK</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS EXEGGUTOR:GRASS,PSYCHIC EXEGGUTOR:PSYCHIC,GRASS EXEGGUTOR:PSYCHIC,PSYCHIC VENUSAUR:GRASS,GRASS <br>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC VILEPLUME:GRASS,GRASS VILEPLUME:GRASS,FAIRY <br>GOLDUCK:PSYCHIC,PSYCHIC VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS <br>BELLOSSOM:GRASS,GRASS BELLOSSOM:GRASS,FAIRY LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>MANTINE:FLYING,FLYING JUMPLUFF:GRASS,FAIRY JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC GOLDUCK:PSYCHIC,PSYCHIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>WATER</td><td>FIGHTING</td><td>-3.0</td><td>-2.75</td><td>EXEGGUTOR:GRASS,GRASS EXEGGUTOR:GRASS,PSYCHIC EXEGGUTOR:PSYCHIC,GRASS EXEGGUTOR:PSYCHIC,PSYCHIC VENUSAUR:GRASS,GRASS <br>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC VILEPLUME:GRASS,GRASS VILEPLUME:GRASS,FAIRY <br>VICTREEBEL:GRASS,GRASS MANTINE:FLYING,FLYING JUMPLUFF:GRASS,FAIRY JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>FIGHTING</td><td>WATER</td><td>-3.0</td><td>-2.75</td><td>EXEGGUTOR:GRASS,GRASS EXEGGUTOR:GRASS,PSYCHIC EXEGGUTOR:PSYCHIC,GRASS EXEGGUTOR:PSYCHIC,PSYCHIC VENUSAUR:GRASS,GRASS <br>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC VILEPLUME:GRASS,GRASS VILEPLUME:GRASS,FAIRY <br>VICTREEBEL:GRASS,GRASS MANTINE:FLYING,FLYING JUMPLUFF:GRASS,FAIRY JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>FIGHTING</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>GROUND</td><td>WATER</td><td>-3.5</td><td>-3.0</td><td>MANTINE:FLYING,FLYING JUMPLUFF:GRASS,FAIRY JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>GROUND</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>MANTINE:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Poliwrath</td><td>GROUND</td><td>FIGHTING</td><td>-3.75</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC BUTTERFREE:PSYCHIC,PSYCHIC <br>TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Granbull</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>MACHAMP:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Granbull</td><td>DARK</td><td>FIGHTING</td><td>-2.75</td><td>-1.5</td><td>BEEDRILL:POISON,POISON ARIADOS:POISON,POISON </td></tr>
+<tr><td>1</td><td>Granbull</td><td>DARK</td><td>FAIRY</td><td>-2.5</td><td>-1.5</td><td>SCIZOR:STEEL,STEEL MUK:POISON,POISON STEELIX:STEEL,STEEL NIDOKING:POISON,POISON NIDOKING:STEEL,POISON <br>TENTACRUEL:POISON,POISON NIDOQUEEN:POISON,POISON VICTREEBEL:POISON,POISON WEEZING:POISON,POISON <br>SKARMORY:STEEL,STEEL QWILFISH:POISON,POISON BEEDRILL:POISON,POISON ARBOK:POISON,POISON <br>ARIADOS:POISON,POISON </td></tr>
+<tr><td>1</td><td>Steelix</td><td>STEEL</td><td>STEEL</td><td>-3.5</td><td>-3.0</td><td>LANTURN:WATER,WATER </td></tr>
+<tr><td>1</td><td>Steelix</td><td>STEEL</td><td>DARK</td><td>-3.0</td><td>-2.5</td><td>HOUNDOOM:FIRE,FIRE POLIWRATH:WATER,WATER POLIWRATH:WATER,FIGHTING POLIWRATH:FIGHTING,WATER POLIWRATH:FIGHTING,FIGHTING <br></td></tr>
+<tr><td>1</td><td>Steelix</td><td>STEEL</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>CHARIZARD:FIRE,FIRE MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Steelix</td><td>DRAGON</td><td>STEEL</td><td>-3.0</td><td>-2.5</td><td>AZUMARILL:WATER,WATER AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Steelix</td><td>DRAGON</td><td>DARK</td><td>-3.5</td><td>-2.0</td><td>AZUMARILL:WATER,WATER AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Steelix</td><td>DRAGON</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>CHARIZARD:FIRE,FIRE MANTINE:WATER,WATER AZUMARILL:WATER,WATER AZUMARILL:FIGHTING,WATER </td></tr>
+<tr><td>1</td><td>Kingdra</td><td>WATER</td><td>WATER</td><td>-3.5</td><td>-1.25</td><td>KINGDRA:DRAGON,DRAGON </td></tr>
+<tr><td>1</td><td>Kingdra</td><td>WATER</td><td>DRAGON</td><td>-2.5</td><td>-1.5</td><td>GYARADOS:DRAGON,DRAGON AZUMARILL:FIGHTING,FAIRY </td></tr>
+<tr><td>1</td><td>Kingdra</td><td>WATER</td><td>ICE</td><td>-2.75</td><td>-1.0</td><td>KINGDRA:DRAGON,DRAGON </td></tr>
+<tr><td>1</td><td>Kingdra</td><td>DRAGON</td><td>WATER</td><td>-2.5</td><td>-1.5</td><td>GYARADOS:DRAGON,DRAGON AZUMARILL:FIGHTING,FAIRY </td></tr>
+<tr><td>1</td><td>Kingdra</td><td>DRAGON</td><td>DRAGON</td><td>-3.0</td><td>-2.0</td><td>GRANBULL:DARK,FAIRY CLEFABLE:ELECTRIC,FAIRY CLEFABLE:PSYCHIC,FAIRY CLEFABLE:NORMAL,FAIRY WIGGLYTUFF:NORMAL,FAIRY <br>WIGGLYTUFF:DARK,FAIRY TOGETIC:PSYCHIC,FAIRY TOGETIC:NORMAL,FAIRY AZUMARILL:FIGHTING,FAIRY <br></td></tr>
+<tr><td>1</td><td>Kingdra</td><td>DRAGON</td><td>ICE</td><td>-2.5</td><td>-1.0</td><td>AZUMARILL:FIGHTING,FAIRY </td></tr>
+<tr><td>1</td><td>Hitmonlee</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Hitmonlee</td><td>FIGHTING</td><td>ROCK</td><td>-2.5</td><td>-1.5</td><td>ESPEON:PSYCHIC,PSYCHIC EXEGGUTOR:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,FAIRY SLOWBRO:PSYCHIC,PSYCHIC <br>SLOWKING:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,FAIRY HYPNO:PSYCHIC,PSYCHIC <br>GLIGAR:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>POISON</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>NOCTOWL:PSYCHIC,PSYCHIC MANTINE:WATER,WATER MANTINE:WATER,ICE BUTTERFREE:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>POISON</td><td>POISON</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>POISON</td><td>BUG</td><td>-3.0</td><td>-2.5</td><td>VENOMOTH:PSYCHIC,PSYCHIC QWILFISH:WATER,ICE QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>STEEL</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>STEEL</td><td>POISON</td><td>-3.0</td><td>-2.5</td><td>QUAGSIRE:WATER,GROUND QUAGSIRE:GROUND,GROUND QWILFISH:WATER,ICE QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>STEEL</td><td>BUG</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE POLIWRATH:GROUND,WATER POLIWRATH:GROUND,ICE MANTINE:WATER,WATER <br>MANTINE:WATER,ICE QWILFISH:WATER,ICE QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>BUG</td><td>GROUND</td><td>-3.75</td><td>-2.5</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>BUG</td><td>POISON</td><td>-3.0</td><td>-2.5</td><td>VENOMOTH:PSYCHIC,PSYCHIC QWILFISH:WATER,ICE QWILFISH:WATER,WATER </td></tr>
+<tr><td>1</td><td>Nidoking</td><td>BUG</td><td>BUG</td><td>-3.5</td><td>-2.0</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Tentacruel</td><td>POISON</td><td>ICE</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Tentacruel</td><td>POISON</td><td>POISON</td><td>-4.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Tentacruel</td><td>POISON</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Politoed</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Politoed</td><td>WATER</td><td>GROUND</td><td>-3.5</td><td>-2.0</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Politoed</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Politoed</td><td>GROUND</td><td>WATER</td><td>-3.5</td><td>-2.0</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Politoed</td><td>GROUND</td><td>GROUND</td><td>-4.0</td><td>-2.0</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Politoed</td><td>GROUND</td><td>ICE</td><td>-2.0</td><td>-1.0</td><td>PORYGON2:ELECTRIC,ELECTRIC PORYGON2:ELECTRIC,GRASS </td></tr>
+<tr><td>1</td><td>Vileplume</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING SKARMORY:FLYING,FLYING <br>VENOMOTH:PSYCHIC,PSYCHIC BUTTERFREE:PSYCHIC,PSYCHIC YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Vileplume</td><td>GRASS</td><td>FAIRY</td><td>-3.25</td><td>-2.5</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING VENOMOTH:PSYCHIC,PSYCHIC <br></td></tr>
+<tr><td>1</td><td>Vileplume</td><td>POISON</td><td>GRASS</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Vileplume</td><td>POISON</td><td>FAIRY</td><td>-3.5</td><td>-2.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Clefable</td><td>ELECTRIC</td><td>PSYCHIC</td><td>-3.5</td><td>-1.5</td><td>STEELIX:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Clefable</td><td>ELECTRIC</td><td>FAIRY</td><td>-3.5</td><td>-2.0</td><td>STEELIX:STEEL,STEEL NIDOKING:POISON,POISON NIDOKING:STEEL,POISON NIDOQUEEN:POISON,POISON </td></tr>
+<tr><td>1</td><td>Clefable</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-3.0</td><td>-1.5</td><td>TYRANITAR:STEEL,ROCK TYRANITAR:STEEL,FIRE SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL <br></td></tr>
+<tr><td>1</td><td>Clefable</td><td>PSYCHIC</td><td>FAIRY</td><td>-3.0</td><td>-1.5</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Clefable</td><td>NORMAL</td><td>PSYCHIC</td><td>-3.0</td><td>-1.0</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Clefable</td><td>NORMAL</td><td>FAIRY</td><td>-3.0</td><td>-2.0</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>POISON</td><td>POISON</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>POISON</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>NOCTOWL:PSYCHIC,PSYCHIC MANTINE:WATER,WATER MANTINE:WATER,ICE BUTTERFREE:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>POISON</td><td>ROCK</td><td>-3.25</td><td>-2.25</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>DARK</td><td>POISON</td><td>-2.75</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>DARK</td><td>GROUND</td><td>-3.5</td><td>-2.0</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Nidoqueen</td><td>DARK</td><td>ROCK</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE POLIWRATH:GROUND,WATER POLIWRATH:GROUND,ICE </td></tr>
+<tr><td>1</td><td>Sandslash</td><td>STEEL</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE </td></tr>
+<tr><td>1</td><td>Sandslash</td><td>STEEL</td><td>ROCK</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE </td></tr>
+<tr><td>1</td><td>Sandslash</td><td>GROUND</td><td>GROUND</td><td>-4.0</td><td>-2.0</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Sandslash</td><td>GROUND</td><td>ROCK</td><td>-2.5</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS POLIWRATH:WATER,WATER POLIWRATH:WATER,ICE MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS <br>BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Miltank</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Miltank</td><td>NORMAL</td><td>STEEL</td><td>-2.5</td><td>-1.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Miltank</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Miltank</td><td>PSYCHIC</td><td>STEEL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Starmie</td><td>NORMAL</td><td>WATER</td><td>-3.0</td><td>-2.5</td><td>GENGAR:GHOST,GHOST GENGAR:GHOST,DARK GENGAR:DARK,GHOST GENGAR:DARK,DARK MISDREAVUS:GHOST,GHOST <br>MISDREAVUS:GHOST,DARK </td></tr>
+<tr><td>1</td><td>Starmie</td><td>NORMAL</td><td>PSYCHIC</td><td>-3.5</td><td>-2.0</td><td>TYRANITAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Starmie</td><td>NORMAL</td><td>ROCK</td><td>-3.0</td><td>-2.0</td><td>GENGAR:GHOST,GHOST GENGAR:GHOST,DARK GENGAR:DARK,GHOST GENGAR:DARK,DARK MAGNETON:ELECTRIC,ELECTRIC <br>MISDREAVUS:GHOST,GHOST MISDREAVUS:GHOST,DARK </td></tr>
+<tr><td>1</td><td>Starmie</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>GYARADOS:DARK,DARK EXEGGUTOR:GRASS,GRASS FERALIGATR:DARK,DARK VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS <br>VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS TANGELA:BUG,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS PARASECT:BUG,BUG <br>PARASECT:BUG,GRASS JUMPLUFF:BUG,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Starmie</td><td>WATER</td><td>PSYCHIC</td><td>-3.0</td><td>-2.5</td><td>EXEGGUTOR:GRASS,GRASS UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Starmie</td><td>WATER</td><td>ROCK</td><td>-2.5</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS FERALIGATR:DARK,DARK VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS <br>MAGNETON:ELECTRIC,ELECTRIC MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS TANGELA:BUG,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Blastoise</td><td>DARK</td><td>WATER</td><td>-2.5</td><td>-1.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS <br>BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Blastoise</td><td>DARK</td><td>STEEL</td><td>-2.75</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Blastoise</td><td>DARK</td><td>ICE</td><td>-2.5</td><td>-1.0</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Blastoise</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Blastoise</td><td>WATER</td><td>STEEL</td><td>-3.25</td><td>-1.75</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Blastoise</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Piloswine</td><td>ICE</td><td>ICE</td><td>-3.5</td><td>-3.0</td><td>LAPRAS:WATER,WATER DEWGONG:STEEL,WATER </td></tr>
+<tr><td>1</td><td>Piloswine</td><td>ICE</td><td>GROUND</td><td>-3.0</td><td>-2.5</td><td>SCIZOR:STEEL,STEEL CHARIZARD:FIRE,FIRE MANTINE:WATER,WATER SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Piloswine</td><td>ICE</td><td>ROCK</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:WATER,FIGHTING POLIWRATH:FIGHTING,WATER POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Golduck</td><td>PSYCHIC</td><td>WATER</td><td>-3.0</td><td>-1.5</td><td>EXEGGUTOR:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Golduck</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Golduck</td><td>PSYCHIC</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Golduck</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Golduck</td><td>WATER</td><td>PSYCHIC</td><td>-3.0</td><td>-1.5</td><td>EXEGGUTOR:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Golduck</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Victreebel</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING SKARMORY:FLYING,FLYING <br>VENOMOTH:PSYCHIC,PSYCHIC BUTTERFREE:PSYCHIC,PSYCHIC YANMA:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Victreebel</td><td>GRASS</td><td>POISON</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Victreebel</td><td>POISON</td><td>GRASS</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Victreebel</td><td>POISON</td><td>POISON</td><td>-4.0</td><td>-2.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Forretress</td><td>BUG</td><td>STEEL</td><td>-7.25</td><td>-3.5</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Forretress</td><td>BUG</td><td>GROUND</td><td>-7.75</td><td>-2.5</td><td>CHARIZARD:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Forretress</td><td>BUG</td><td>ROCK</td><td>-5.5</td><td>-2.5</td><td>FLAREON:FIRE,FIRE ARCANINE:FIRE,FIRE TYPHLOSION:FIRE,FIRE MAGMAR:FIRE,FIRE RAPIDASH:FIRE,FIRE <br>NINETALES:FIRE,FIRE MAGCARGO:FIRE,FIRE </td></tr>
+<tr><td>1</td><td>Magmar</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Magmar</td><td>FIGHTING</td><td>FIRE</td><td>-3.0</td><td>-2.5</td><td>SLOWBRO:WATER,WATER STARMIE:WATER,WATER STARMIE:WATER,ROCK MANTINE:WATER,WATER QWILFISH:WATER,WATER <br>AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Rapidash</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Rapidash</td><td>FIRE</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Rapidash</td><td>FIGHTING</td><td>FIRE</td><td>-3.0</td><td>-2.5</td><td>SLOWBRO:WATER,WATER STARMIE:WATER,WATER STARMIE:WATER,ROCK MANTINE:WATER,WATER QWILFISH:WATER,WATER <br>AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Rapidash</td><td>FIGHTING</td><td>GROUND</td><td>-3.5</td><td>-2.0</td><td>MANTINE:WATER,WATER </td></tr>
+<tr><td>1</td><td>Magneton</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-2.5</td><td>RHYDON:GROUND,GROUND RHYDON:FIGHTING,GROUND DONPHAN:FIGHTING,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND <br>QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND MAROWAK:FIGHTING,GROUND </td></tr>
+<tr><td>1</td><td>Magneton</td><td>ELECTRIC</td><td>STEEL</td><td>-3.5</td><td>-2.0</td><td>QUAGSIRE:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Meganium</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.5</td><td>SCIZOR:BUG,BUG CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON <br>SCYTHER:BUG,BUG SCYTHER:BUG,FLYING SCYTHER:FLYING,BUG SCYTHER:FLYING,FLYING <br>VICTREEBEL:POISON,POISON SKARMORY:FLYING,FLYING VENOMOTH:BUG,BUG BEEDRILL:POISON,POISON <br>BEEDRILL:POISON,BUG BEEDRILL:POISON,FLYING BEEDRILL:BUG,POISON BEEDRILL:BUG,BUG <br>BEEDRILL:BUG,FLYING BUTTERFREE:BUG,BUG PARASECT:BUG,BUG PARASECT:BUG,POISON <br>ARIADOS:POISON,POISON ARIADOS:POISON,BUG ARIADOS:BUG,POISON ARIADOS:BUG,BUG <br>YANMA:FLYING,FLYING YANMA:FLYING,BUG </td></tr>
+<tr><td>1</td><td>Meganium</td><td>GRASS</td><td>GROUND</td><td>-3.75</td><td>-3.25</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON SCYTHER:BUG,BUG <br>SCYTHER:BUG,FLYING SCYTHER:FLYING,BUG SCYTHER:FLYING,FLYING SKARMORY:FLYING,FLYING <br>BUTTERFREE:BUG,BUG YANMA:FLYING,FLYING YANMA:FLYING,BUG </td></tr>
+<tr><td>1</td><td>Tangela</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.5</td><td>SCIZOR:BUG,BUG CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON <br>SCYTHER:BUG,BUG SCYTHER:BUG,FLYING SCYTHER:FLYING,BUG SCYTHER:FLYING,FLYING <br>VICTREEBEL:POISON,POISON SKARMORY:FLYING,FLYING VENOMOTH:BUG,BUG BEEDRILL:POISON,POISON <br>BEEDRILL:POISON,BUG BEEDRILL:POISON,FLYING BEEDRILL:BUG,POISON BEEDRILL:BUG,BUG <br>BEEDRILL:BUG,FLYING BUTTERFREE:BUG,BUG PARASECT:BUG,BUG PARASECT:BUG,POISON <br>ARIADOS:POISON,POISON ARIADOS:POISON,BUG ARIADOS:BUG,POISON ARIADOS:BUG,BUG <br>YANMA:FLYING,FLYING YANMA:FLYING,BUG </td></tr>
+<tr><td>1</td><td>Tangela</td><td>GRASS</td><td>POISON</td><td>-3.75</td><td>-3.0</td><td>SCIZOR:BUG,BUG SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Tangela</td><td>BUG</td><td>GRASS</td><td>-3.5</td><td>-3.25</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON SKARMORY:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Tangela</td><td>BUG</td><td>POISON</td><td>-3.75</td><td>-3.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Electabuzz</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Electabuzz</td><td>FIGHTING</td><td>ELECTRIC</td><td>-3.0</td><td>-1.5</td><td>SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>NORMAL</td><td>POISON</td><td>-3.25</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>NORMAL</td><td>DARK</td><td>-2.5</td><td>-1.5</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND CLEFABLE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>NORMAL</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>SNORLAX:PSYCHIC,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND NOCTOWL:PSYCHIC,PSYCHIC <br>GIRAFARIG:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Weezing</td><td>BUG</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>VENOMOTH:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Weezing</td><td>BUG</td><td>DARK</td><td>-3.25</td><td>-2.0</td><td>TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>BUG</td><td>GHOST</td><td>-3.5</td><td>-2.0</td><td>NOCTOWL:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Weezing</td><td>POISON</td><td>POISON</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>POISON</td><td>DARK</td><td>-2.75</td><td>-1.75</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Weezing</td><td>POISON</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>SNORLAX:PSYCHIC,GROUND BLISSEY:PSYCHIC,PSYCHIC TAUROS:PSYCHIC,GROUND KANGASKHAN:GROUND,GROUND NOCTOWL:PSYCHIC,PSYCHIC <br>GIRAFARIG:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Ninetales</td><td>DARK</td><td>FIRE</td><td>-3.0</td><td>-2.5</td><td>POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER AZUMARILL:WATER,WATER </td></tr>
+<tr><td>1</td><td>Ninetales</td><td>DARK</td><td>GRASS</td><td>-2.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,GROUND KANGASKHAN:GROUND,GROUND KINGDRA:WATER,WATER MANTINE:WATER,WATER QWILFISH:WATER,WATER <br>TOGETIC:PSYCHIC,GROUND TOGETIC:NORMAL,GROUND MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Ninetales</td><td>FIRE</td><td>FIRE</td><td>-3.5</td><td>-3.0</td><td>OMASTAR:WATER,WATER OMASTAR:WATER,ROCK OMASTAR:GROUND,WATER OMASTAR:GROUND,ROCK OMASTAR:ROCK,WATER <br>OMASTAR:ROCK,ROCK KABUTOPS:GROUND,WATER KABUTOPS:GROUND,ROCK KINGDRA:WATER,WATER <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Ninetales</td><td>FIRE</td><td>GRASS</td><td>-2.75</td><td>-1.5</td><td>KINGDRA:WATER,WATER MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Dodrio</td><td>DARK</td><td>FLYING</td><td>-2.75</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Dodrio</td><td>STEEL</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Octillery</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Octillery</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Octillery</td><td>WATER</td><td>POISON</td><td>-3.0</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Octillery</td><td>GROUND</td><td>ICE</td><td>-2.0</td><td>-1.0</td><td>PORYGON2:ELECTRIC,ELECTRIC PORYGON2:ELECTRIC,GRASS </td></tr>
+<tr><td>1</td><td>Octillery</td><td>GROUND</td><td>WATER</td><td>-3.5</td><td>-2.0</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Octillery</td><td>GROUND</td><td>POISON</td><td>-2.0</td><td>-1.5</td><td>VENUSAUR:GRASS,GRASS PORYGON2:ELECTRIC,ELECTRIC PORYGON2:ELECTRIC,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS <br>MAGNETON:ELECTRIC,ELECTRIC SKARMORY:FLYING,FLYING JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Bellossom</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.5</td><td>SCIZOR:BUG,BUG CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON <br>SCYTHER:BUG,BUG SCYTHER:BUG,FLYING SCYTHER:FLYING,BUG SCYTHER:FLYING,FLYING <br>VICTREEBEL:POISON,POISON SKARMORY:FLYING,FLYING VENOMOTH:BUG,BUG BEEDRILL:POISON,POISON <br>BEEDRILL:POISON,BUG BEEDRILL:POISON,FLYING BEEDRILL:BUG,POISON BEEDRILL:BUG,BUG <br>BEEDRILL:BUG,FLYING BUTTERFREE:BUG,BUG PARASECT:BUG,BUG PARASECT:BUG,POISON <br>ARIADOS:POISON,POISON ARIADOS:POISON,BUG ARIADOS:BUG,POISON ARIADOS:BUG,BUG <br>YANMA:FLYING,FLYING YANMA:FLYING,BUG </td></tr>
+<tr><td>1</td><td>Bellossom</td><td>GRASS</td><td>FAIRY</td><td>-3.25</td><td>-3.0</td><td>SCIZOR:BUG,BUG CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON <br>VICTREEBEL:POISON,POISON SKARMORY:FLYING,FLYING VENOMOTH:BUG,BUG BEEDRILL:POISON,POISON <br>BEEDRILL:POISON,BUG BEEDRILL:POISON,FLYING BEEDRILL:BUG,POISON BEEDRILL:BUG,BUG <br>BEEDRILL:BUG,FLYING ARIADOS:POISON,POISON ARIADOS:POISON,BUG ARIADOS:BUG,POISON <br>ARIADOS:BUG,BUG </td></tr>
+<tr><td>1</td><td>Bellossom</td><td>POISON</td><td>GRASS</td><td>-3.75</td><td>-3.0</td><td>SCIZOR:BUG,BUG SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Bellossom</td><td>POISON</td><td>FAIRY</td><td>-3.5</td><td>-3.0</td><td>SCIZOR:BUG,BUG SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Primeape</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Primeape</td><td>FIGHTING</td><td>DARK</td><td>-3.25</td><td>-2.0</td><td>TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>FIGHTING</td><td>FIRE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>FIGHTING</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>FIGHTING</td><td>ELECTRIC</td><td>-3.5</td><td>-2.0</td><td>GLIGAR:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>STEEL</td><td>FIRE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC GOLDUCK:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>STEEL</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC GOLDUCK:PSYCHIC,PSYCHIC </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>STEEL</td><td>FIGHTING</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmonchan</td><td>STEEL</td><td>ELECTRIC</td><td>-3.0</td><td>-1.5</td><td>GLIGAR:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Lanturn</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS POLITOED:GROUND,GROUND VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS <br>MEGANIUM:GRASS,GRASS MEGANIUM:GRASS,GROUND TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS <br>SUNFLORA:GRASS,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Lanturn</td><td>WATER</td><td>ELECTRIC</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>MEGANIUM:GRASS,GROUND TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS <br>QUAGSIRE:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Lanturn</td><td>ELECTRIC</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>MEGANIUM:GRASS,GROUND TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS <br>QUAGSIRE:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Lanturn</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Sudowoodo</td><td>ROCK</td><td>GROUND</td><td>-3.0</td><td>-2.5</td><td>SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Sudowoodo</td><td>ROCK</td><td>ROCK</td><td>-3.5</td><td>-3.0</td><td>STEELIX:STEEL,STEEL STEELIX:STEEL,GROUND </td></tr>
+<tr><td>1</td><td>Sudowoodo</td><td>FIGHTING</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Sudowoodo</td><td>FIGHTING</td><td>ROCK</td><td>-3.0</td><td>-2.5</td><td>NIDOKING:STEEL,GROUND </td></tr>
+<tr><td>1</td><td>Umbreon</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>HERACROSS:FIGHTING,FIGHTING HERACROSS:FIGHTING,BUG HERACROSS:BUG,FIGHTING HERACROSS:BUG,BUG MACHAMP:FIGHTING,FIGHTING <br>POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING HITMONCHAN:FIGHTING,FIGHTING <br>HITMONTOP:FIGHTING,FIGHTING AZUMARILL:FIGHTING,FAIRY </td></tr>
+<tr><td>1</td><td>Hypno</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Hypno</td><td>PSYCHIC</td><td>FIGHTING</td><td>-3.25</td><td>-2.0</td><td>XATU:DARK,GHOST </td></tr>
+<tr><td>1</td><td>Sunflora</td><td>GRASS</td><td>GRASS</td><td>-3.5</td><td>-3.5</td><td>SCIZOR:BUG,BUG CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING CROBAT:FLYING,POISON <br>SCYTHER:BUG,BUG SCYTHER:BUG,FLYING SCYTHER:FLYING,BUG SCYTHER:FLYING,FLYING <br>VICTREEBEL:POISON,POISON SKARMORY:FLYING,FLYING VENOMOTH:BUG,BUG BEEDRILL:POISON,POISON <br>BEEDRILL:POISON,BUG BEEDRILL:POISON,FLYING BEEDRILL:BUG,POISON BEEDRILL:BUG,BUG <br>BEEDRILL:BUG,FLYING BUTTERFREE:BUG,BUG PARASECT:BUG,BUG PARASECT:BUG,POISON <br>ARIADOS:POISON,POISON ARIADOS:POISON,BUG ARIADOS:BUG,POISON ARIADOS:BUG,BUG <br>YANMA:FLYING,FLYING YANMA:FLYING,BUG </td></tr>
+<tr><td>1</td><td>Sunflora</td><td>GRASS</td><td>POISON</td><td>-3.75</td><td>-3.0</td><td>SCIZOR:BUG,BUG SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Seaking</td><td>FLYING</td><td>WATER</td><td>-3.0</td><td>-1.5</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Seaking</td><td>FLYING</td><td>BUG</td><td>-3.25</td><td>-1.25</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Seaking</td><td>FLYING</td><td>ICE</td><td>-3.25</td><td>-1.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Seaking</td><td>POISON</td><td>WATER</td><td>-3.0</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Seaking</td><td>POISON</td><td>BUG</td><td>-3.5</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Seaking</td><td>POISON</td><td>ICE</td><td>-3.5</td><td>-1.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>FLYING</td><td>PSYCHIC</td><td>-3.25</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>FLYING</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>PORYGON2:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>PSYCHIC</td><td>FLYING</td><td>-3.25</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Noctowl</td><td>PSYCHIC</td><td>GHOST</td><td>-3.5</td><td>-2.0</td><td>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Mantine</td><td>WATER</td><td>WATER</td><td>-7.0</td><td>-3.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Mantine</td><td>WATER</td><td>FLYING</td><td>-7.0</td><td>-3.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Mantine</td><td>WATER</td><td>ICE</td><td>-7.0</td><td>-3.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Mantine</td><td>FLYING</td><td>WATER</td><td>-7.0</td><td>-3.0</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Mantine</td><td>FLYING</td><td>FLYING</td><td>-7.5</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Mantine</td><td>FLYING</td><td>ICE</td><td>-7.25</td><td>-3.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Skarmory</td><td>STEEL</td><td>STEEL</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Skarmory</td><td>STEEL</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Skarmory</td><td>FLYING</td><td>STEEL</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Skarmory</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Raichu</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Raichu</td><td>ELECTRIC</td><td>FIGHTING</td><td>-3.0</td><td>-1.5</td><td>SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Pidgeot</td><td>STEEL</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Pidgeot</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Stantler</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Stantler</td><td>NORMAL</td><td>BUG</td><td>-2.75</td><td>-1.5</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Stantler</td><td>NORMAL</td><td>ELECTRIC</td><td>-2.5</td><td>-1.5</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK </td></tr>
+<tr><td>1</td><td>Stantler</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Stantler</td><td>PSYCHIC</td><td>BUG</td><td>-2.0</td><td>-1.25</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Stantler</td><td>PSYCHIC</td><td>ELECTRIC</td><td>-2.0</td><td>-1.5</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK DONPHAN:FIGHTING,GROUND DONPHAN:FIGHTING,STEEL <br>DONPHAN:FIGHTING,FAIRY PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING MAROWAK:FIGHTING,GROUND <br></td></tr>
+<tr><td>1</td><td>Xatu</td><td>DARK</td><td>FLYING</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Xatu</td><td>DARK</td><td>GHOST</td><td>-3.0</td><td>-2.0</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,DARK PORYGON2:ELECTRIC,ELECTRIC HOUNDOOM:DARK,DARK UMBREON:DARK,DARK <br>SNEASEL:ICE,ICE SNEASEL:ICE,DARK SNEASEL:DARK,ICE SNEASEL:DARK,DARK <br>DUNSPARCE:DARK,ROCK DUNSPARCE:GHOST,ROCK MURKROW:DARK,DARK </td></tr>
+<tr><td>1</td><td>Xatu</td><td>DARK</td><td>PSYCHIC</td><td>-3.5</td><td>-2.0</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:ICE,ICE <br>SNEASEL:ICE,DARK SNEASEL:DARK,ICE SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Xatu</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Xatu</td><td>FLYING</td><td>GHOST</td><td>-3.0</td><td>-2.5</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,DARK PORYGON2:ELECTRIC,ELECTRIC DUNSPARCE:DARK,ROCK DUNSPARCE:GHOST,ROCK <br></td></tr>
+<tr><td>1</td><td>Xatu</td><td>FLYING</td><td>PSYCHIC</td><td>-3.5</td><td>-2.5</td><td>TYRANITAR:DARK,ROCK TYRANITAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Venomoth</td><td>BUG</td><td>BUG</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING TOGETIC:PSYCHIC,FLYING <br></td></tr>
+<tr><td>1</td><td>Venomoth</td><td>BUG</td><td>PSYCHIC</td><td>-3.25</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Venomoth</td><td>PSYCHIC</td><td>BUG</td><td>-3.25</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Venomoth</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-3.0</td><td>HOUNDOOM:FIRE,FIRE MURKROW:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Quagsire</td><td>WATER</td><td>GROUND</td><td>-7.5</td><td>-3.5</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Quagsire</td><td>WATER</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS MEGANIUM:GRASS,GRASS <br>TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Quagsire</td><td>WATER</td><td>POISON</td><td>-6.5</td><td>-2.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Quagsire</td><td>GROUND</td><td>GROUND</td><td>-8.0</td><td>-3.5</td><td>JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Quagsire</td><td>GROUND</td><td>ROCK</td><td>-6.5</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS BELLOSSOM:GRASS,GRASS SUNFLORA:GRASS,GRASS <br></td></tr>
+<tr><td>1</td><td>Quagsire</td><td>GROUND</td><td>POISON</td><td>-6.0</td><td>-2.5</td><td>VENUSAUR:GRASS,GRASS VILEPLUME:GRASS,GRASS VICTREEBEL:GRASS,GRASS JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC POLITOED:GROUND,GROUND GOLDUCK:PSYCHIC,PSYCHIC LANTURN:ELECTRIC,ELECTRIC <br></td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>EXEGGUTOR:PSYCHIC,PSYCHIC SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC POLITOED:GROUND,GROUND GOLDUCK:PSYCHIC,PSYCHIC <br>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>WATER</td><td>POISON</td><td>-3.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>POISON</td><td>ICE</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>POISON</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Qwilfish</td><td>POISON</td><td>POISON</td><td>-4.0</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Wigglytuff</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>SCIZOR:STEEL,STEEL AERODACTYL:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Wigglytuff</td><td>NORMAL</td><td>FAIRY</td><td>-3.0</td><td>-2.0</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Wigglytuff</td><td>DARK</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>MACHAMP:STEEL,STEEL SCIZOR:STEEL,STEEL AERODACTYL:STEEL,STEEL STEELIX:STEEL,STEEL SKARMORY:STEEL,STEEL <br></td></tr>
+<tr><td>1</td><td>Wigglytuff</td><td>DARK</td><td>FAIRY</td><td>-2.5</td><td>-1.5</td><td>SCIZOR:STEEL,STEEL MUK:POISON,POISON STEELIX:STEEL,STEEL NIDOKING:POISON,POISON NIDOKING:STEEL,POISON <br>TENTACRUEL:POISON,POISON NIDOQUEEN:POISON,POISON VICTREEBEL:POISON,POISON WEEZING:POISON,POISON <br>SKARMORY:STEEL,STEEL QWILFISH:POISON,POISON BEEDRILL:POISON,POISON ARBOK:POISON,POISON <br>ARIADOS:POISON,POISON </td></tr>
+<tr><td>1</td><td>Hitmontop</td><td>FIGHTING</td><td>STEEL</td><td>-3.0</td><td>-2.0</td><td>SLOWBRO:PSYCHIC,PSYCHIC SLOWKING:PSYCHIC,PSYCHIC MANTINE:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmontop</td><td>FIGHTING</td><td>ROCK</td><td>-2.5</td><td>-1.5</td><td>ESPEON:PSYCHIC,PSYCHIC EXEGGUTOR:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,PSYCHIC ALAKAZAM:PSYCHIC,FAIRY SLOWBRO:PSYCHIC,PSYCHIC <br>SLOWKING:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,PSYCHIC CLEFABLE:PSYCHIC,FAIRY HYPNO:PSYCHIC,PSYCHIC <br>GLIGAR:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Hitmontop</td><td>FIGHTING</td><td>FIGHTING</td><td>-3.5</td><td>-3.0</td><td>CROBAT:FLYING,FLYING SCYTHER:FLYING,FLYING XATU:FLYING,FLYING XATU:FLYING,PSYCHIC VENOMOTH:PSYCHIC,PSYCHIC <br>BUTTERFREE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,FAIRY TOGETIC:PSYCHIC,FLYING YANMA:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Electrode</td><td>ELECTRIC</td><td>ELECTRIC</td><td>-4.0</td><td>-3.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND SANDSLASH:GROUND,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND <br></td></tr>
+<tr><td>1</td><td>Electrode</td><td>ELECTRIC</td><td>NORMAL</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Dewgong</td><td>ICE</td><td>ICE</td><td>-3.0</td><td>-2.0</td><td>OMASTAR:ROCK,ROCK KABUTOPS:FIGHTING,ROCK POLIWRATH:FIGHTING,FIGHTING MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Dewgong</td><td>ICE</td><td>WATER</td><td>-3.0</td><td>-2.0</td><td>POLIWRATH:FIGHTING,FIGHTING LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Dewgong</td><td>STEEL</td><td>ICE</td><td>-3.25</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Dewgong</td><td>STEEL</td><td>WATER</td><td>-3.25</td><td>-2.5</td><td>LANTURN:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Sneasel</td><td>ICE</td><td>ICE</td><td>-7.0</td><td>-4.0</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Sneasel</td><td>ICE</td><td>DARK</td><td>-7.0</td><td>-4.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Sneasel</td><td>DARK</td><td>ICE</td><td>-7.0</td><td>-4.5</td><td>POLIWRATH:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Sneasel</td><td>DARK</td><td>DARK</td><td>-7.0</td><td>-5.0</td><td>HERACROSS:FIGHTING,FIGHTING MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING <br>HITMONCHAN:FIGHTING,FIGHTING HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Girafarig</td><td>NORMAL</td><td>PSYCHIC</td><td>-3.5</td><td>-2.0</td><td>TYRANITAR:DARK,DARK </td></tr>
+<tr><td>1</td><td>Girafarig</td><td>NORMAL</td><td>ELECTRIC</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,DARK NIDOKING:BUG,BUG GLIGAR:BUG,DARK </td></tr>
+<tr><td>1</td><td>Girafarig</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-4.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Girafarig</td><td>PSYCHIC</td><td>ELECTRIC</td><td>-3.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK GLIGAR:BUG,DARK <br></td></tr>
+<tr><td>1</td><td>Fearow</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Fearow</td><td>FLYING</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>AERODACTYL:STEEL,ROCK AERODACTYL:DARK,ROCK </td></tr>
+<tr><td>1</td><td>Fearow</td><td>FLYING</td><td>DRAGON</td><td>-3.25</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Fearow</td><td>STEEL</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Fearow</td><td>STEEL</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>MANTINE:WATER,ICE MANTINE:FLYING,ICE </td></tr>
+<tr><td>1</td><td>Fearow</td><td>STEEL</td><td>DRAGON</td><td>-3.25</td><td>-1.5</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Misdreavus</td><td>GHOST</td><td>GHOST</td><td>-3.0</td><td>-3.0</td><td>TYRANITAR:DARK,DARK SNORLAX:GHOST,GROUND SNORLAX:GHOST,STEEL HOUNDOOM:DARK,DARK KANGASKHAN:GROUND,DARK <br>DODRIO:DARK,FLYING UMBREON:DARK,DARK NOCTOWL:FLYING,GHOST NOCTOWL:PSYCHIC,GHOST <br>WIGGLYTUFF:DARK,FAIRY SNEASEL:DARK,DARK FURRET:DARK,GROUND DUNSPARCE:DARK,GROUND <br>DUNSPARCE:DARK,ROCK DUNSPARCE:GHOST,GROUND DUNSPARCE:GHOST,ROCK RATICATE:DARK,GROUND <br>MURKROW:DARK,DARK LICKITUNG:GHOST,GRASS AIPOM:GHOST,FLYING </td></tr>
+<tr><td>1</td><td>Misdreavus</td><td>GHOST</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>TYRANITAR:DARK,DARK HOUNDOOM:DARK,DARK UMBREON:DARK,DARK SNEASEL:DARK,DARK MURKROW:DARK,DARK <br></td></tr>
+<tr><td>1</td><td>Beedrill</td><td>POISON</td><td>POISON</td><td>-4.0</td><td>-2.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Beedrill</td><td>POISON</td><td>BUG</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Beedrill</td><td>POISON</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Beedrill</td><td>BUG</td><td>POISON</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Beedrill</td><td>BUG</td><td>BUG</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING TOGETIC:PSYCHIC,FLYING <br></td></tr>
+<tr><td>1</td><td>Beedrill</td><td>BUG</td><td>FLYING</td><td>-3.25</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Gligar</td><td>BUG</td><td>GROUND</td><td>-6.0</td><td>-4.0</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Gligar</td><td>BUG</td><td>DARK</td><td>-6.0</td><td>-4.0</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Gligar</td><td>BUG</td><td>FLYING</td><td>-6.0</td><td>-3.5</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Gligar</td><td>FLYING</td><td>GROUND</td><td>-6.0</td><td>-4.0</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Gligar</td><td>FLYING</td><td>DARK</td><td>-6.5</td><td>-3.5</td><td>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Gligar</td><td>FLYING</td><td>FLYING</td><td>-6.0</td><td>-4.0</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Arbok</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>CLEFABLE:PSYCHIC,PSYCHIC TOGETIC:PSYCHIC,GROUND </td></tr>
+<tr><td>1</td><td>Arbok</td><td>DARK</td><td>POISON</td><td>-2.75</td><td>-1.75</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Arbok</td><td>POISON</td><td>DARK</td><td>-2.75</td><td>-1.75</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Arbok</td><td>POISON</td><td>POISON</td><td>-3.5</td><td>-2.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Butterfree</td><td>PSYCHIC</td><td>PSYCHIC</td><td>-6.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Butterfree</td><td>PSYCHIC</td><td>BUG</td><td>-6.5</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Butterfree</td><td>BUG</td><td>PSYCHIC</td><td>-6.5</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Butterfree</td><td>BUG</td><td>BUG</td><td>-7.0</td><td>-3.25</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Marowak</td><td>GROUND</td><td>GROUND</td><td>-4.0</td><td>-2.0</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Marowak</td><td>FIGHTING</td><td>GROUND</td><td>-3.5</td><td>-2.5</td><td>MANTINE:WATER,WATER MANTINE:WATER,ICE JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Furret</td><td>DARK</td><td>GROUND</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Furret</td><td>DARK</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING <br>HITMONCHAN:FIGHTING,FIGHTING HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Furret</td><td>DARK</td><td>FIGHTING</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Furret</td><td>NORMAL</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Furret</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Furret</td><td>NORMAL</td><td>FIGHTING</td><td>-3.0</td><td>-1.5</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Parasect</td><td>BUG</td><td>BUG</td><td>-7.5</td><td>-6.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Parasect</td><td>BUG</td><td>GRASS</td><td>-7.5</td><td>-6.5</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Parasect</td><td>BUG</td><td>POISON</td><td>-7.75</td><td>-6.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Ariados</td><td>POISON</td><td>POISON</td><td>-4.0</td><td>-2.0</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Ariados</td><td>POISON</td><td>BUG</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Ariados</td><td>POISON</td><td>GHOST</td><td>-3.0</td><td>-2.5</td><td>BLISSEY:PSYCHIC,PSYCHIC NOCTOWL:FLYING,FLYING NOCTOWL:FLYING,PSYCHIC NOCTOWL:PSYCHIC,FLYING NOCTOWL:PSYCHIC,PSYCHIC <br>SKARMORY:FLYING,FLYING PIDGEOT:FLYING,FLYING GIRAFARIG:PSYCHIC,PSYCHIC FEAROW:FLYING,FLYING <br></td></tr>
+<tr><td>1</td><td>Ariados</td><td>BUG</td><td>POISON</td><td>-3.75</td><td>-2.5</td><td>SKARMORY:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Ariados</td><td>BUG</td><td>BUG</td><td>-3.5</td><td>-3.0</td><td>CHARIZARD:FIRE,FIRE CHARIZARD:FLYING,FIRE CROBAT:FLYING,FLYING SKARMORY:FLYING,FLYING TOGETIC:PSYCHIC,FLYING <br></td></tr>
+<tr><td>1</td><td>Ariados</td><td>BUG</td><td>GHOST</td><td>-3.5</td><td>-2.5</td><td>NOCTOWL:FLYING,FLYING NOCTOWL:FLYING,PSYCHIC NOCTOWL:PSYCHIC,FLYING NOCTOWL:PSYCHIC,PSYCHIC PIDGEOT:FLYING,FLYING <br>FEAROW:FLYING,FLYING </td></tr>
+<tr><td>1</td><td>Dunsparce</td><td>DARK</td><td>GROUND</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Dunsparce</td><td>DARK</td><td>ROCK</td><td>-3.0</td><td>-2.0</td><td>MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING HITMONCHAN:FIGHTING,FIGHTING <br>HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Dunsparce</td><td>GHOST</td><td>GROUND</td><td>-3.0</td><td>-2.0</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Dunsparce</td><td>GHOST</td><td>ROCK</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Jumpluff</td><td>BUG</td><td>FAIRY</td><td>-6.0</td><td>-3.0</td><td>LAPRAS:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE </td></tr>
+<tr><td>1</td><td>Jumpluff</td><td>BUG</td><td>GRASS</td><td>-5.0</td><td>-3.25</td><td>LAPRAS:ICE,ICE JYNX:ICE,ICE CLOYSTER:ICE,ICE PILOSWINE:ICE,ICE DEWGONG:ICE,ICE <br>SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Jumpluff</td><td>GRASS</td><td>FAIRY</td><td>-6.0</td><td>-3.0</td><td>JYNX:ICE,ICE </td></tr>
+<tr><td>1</td><td>Jumpluff</td><td>GRASS</td><td>GRASS</td><td>-6.0</td><td>-3.5</td><td>JYNX:ICE,ICE SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Raticate</td><td>DARK</td><td>NORMAL</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING MACHAMP:FIGHTING,FIGHTING POLIWRATH:FIGHTING,FIGHTING HITMONLEE:FIGHTING,FIGHTING PRIMEAPE:FIGHTING,FIGHTING <br>HITMONCHAN:FIGHTING,FIGHTING HITMONTOP:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Raticate</td><td>DARK</td><td>GROUND</td><td>-3.0</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Raticate</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Raticate</td><td>NORMAL</td><td>GROUND</td><td>-2.5</td><td>-1.5</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Togetic</td><td>PSYCHIC</td><td>FAIRY</td><td>-3.0</td><td>-2.0</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL SKARMORY:STEEL,STEEL <br></td></tr>
+<tr><td>1</td><td>Togetic</td><td>PSYCHIC</td><td>GROUND</td><td>-3.5</td><td>-2.0</td><td>SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Togetic</td><td>PSYCHIC</td><td>FLYING</td><td>-3.5</td><td>-2.5</td><td>TYRANITAR:STEEL,ROCK </td></tr>
+<tr><td>1</td><td>Togetic</td><td>NORMAL</td><td>FAIRY</td><td>-3.0</td><td>-2.5</td><td>SCIZOR:STEEL,STEEL STEELIX:STEEL,STEEL MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL SKARMORY:STEEL,STEEL <br>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Togetic</td><td>NORMAL</td><td>GROUND</td><td>-3.5</td><td>-2.0</td><td>AERODACTYL:STEEL,ROCK AERODACTYL:STEEL,STEEL SKARMORY:STEEL,STEEL </td></tr>
+<tr><td>1</td><td>Togetic</td><td>NORMAL</td><td>FLYING</td><td>-3.25</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC MAGNETON:ELECTRIC,STEEL </td></tr>
+<tr><td>1</td><td>Magcargo</td><td>FIRE</td><td>FIRE</td><td>-7.5</td><td>-7.0</td><td>OMASTAR:WATER,WATER OMASTAR:GROUND,WATER KABUTOPS:GROUND,WATER KINGDRA:WATER,WATER </td></tr>
+<tr><td>1</td><td>Magcargo</td><td>FIRE</td><td>ROCK</td><td>-7.0</td><td>-6.5</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER QUAGSIRE:WATER,GROUND <br>QUAGSIRE:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Magcargo</td><td>ROCK</td><td>FIRE</td><td>-7.0</td><td>-6.5</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER QUAGSIRE:WATER,GROUND <br>QUAGSIRE:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Magcargo</td><td>ROCK</td><td>ROCK</td><td>-7.0</td><td>-6.0</td><td>RHYDON:GROUND,GROUND GOLEM:GROUND,GROUND POLIWRATH:WATER,WATER POLIWRATH:GROUND,WATER SANDSLASH:GROUND,GROUND <br>QUAGSIRE:WATER,GROUND QUAGSIRE:GROUND,GROUND MAROWAK:GROUND,GROUND </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>WATER</td><td>WATER</td><td>-3.0</td><td>-3.0</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VENUSAUR:GRASS,POISON TENTACRUEL:POISON,POISON VILEPLUME:GRASS,GRASS <br>VILEPLUME:POISON,GRASS VICTREEBEL:GRASS,GRASS VICTREEBEL:GRASS,POISON VICTREEBEL:POISON,GRASS <br>VICTREEBEL:POISON,POISON MEGANIUM:GRASS,GRASS TANGELA:GRASS,GRASS TANGELA:GRASS,POISON <br>BELLOSSOM:GRASS,GRASS BELLOSSOM:POISON,GRASS LANTURN:ELECTRIC,ELECTRIC SUNFLORA:GRASS,GRASS <br>SUNFLORA:GRASS,POISON QWILFISH:POISON,POISON JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>WATER</td><td>FAIRY</td><td>-3.0</td><td>-2.5</td><td>VENUSAUR:GRASS,GRASS VENUSAUR:GRASS,POISON TENTACRUEL:POISON,POISON VILEPLUME:GRASS,GRASS VILEPLUME:POISON,GRASS <br>VICTREEBEL:GRASS,GRASS VICTREEBEL:GRASS,POISON VICTREEBEL:POISON,GRASS VICTREEBEL:POISON,POISON <br>QWILFISH:POISON,POISON </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>WATER</td><td>ICE</td><td>-3.0</td><td>-1.5</td><td>TENTACRUEL:POISON,POISON LANTURN:ELECTRIC,ELECTRIC QWILFISH:POISON,POISON </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>FIGHTING</td><td>WATER</td><td>-3.0</td><td>-2.5</td><td>EXEGGUTOR:GRASS,GRASS VENUSAUR:GRASS,GRASS VENUSAUR:GRASS,POISON TENTACRUEL:POISON,POISON VILEPLUME:GRASS,GRASS <br>VILEPLUME:POISON,GRASS VICTREEBEL:GRASS,GRASS VICTREEBEL:GRASS,POISON VICTREEBEL:POISON,GRASS <br>VICTREEBEL:POISON,POISON QWILFISH:POISON,POISON JUMPLUFF:GRASS,GRASS </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>FIGHTING</td><td>FAIRY</td><td>-3.25</td><td>-2.5</td><td>BEEDRILL:POISON,POISON ARIADOS:POISON,POISON </td></tr>
+<tr><td>1</td><td>Azumarill</td><td>FIGHTING</td><td>ICE</td><td>-3.0</td><td>-1.5</td><td>TENTACRUEL:POISON,POISON QWILFISH:POISON,POISON </td></tr>
+<tr><td>1</td><td>Murkrow</td><td>DARK</td><td>DARK</td><td>-3.0</td><td>-2.0</td><td>CLEFABLE:ELECTRIC,FAIRY SNEASEL:ICE,ICE </td></tr>
+<tr><td>1</td><td>Murkrow</td><td>DARK</td><td>FLYING</td><td>-2.75</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Murkrow</td><td>FLYING</td><td>DARK</td><td>-2.75</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Murkrow</td><td>FLYING</td><td>FLYING</td><td>-3.5</td><td>-2.0</td><td>MAGNETON:ELECTRIC,ELECTRIC </td></tr>
+<tr><td>1</td><td>Yanma</td><td>NORMAL</td><td>FLYING</td><td>-7.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Yanma</td><td>NORMAL</td><td>ROCK</td><td>-7.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Yanma</td><td>NORMAL</td><td>BUG</td><td>-7.0</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Yanma</td><td>FLYING</td><td>FLYING</td><td>-7.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK OMASTAR:ROCK,ROCK SUDOWOODO:ROCK,ROCK MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Yanma</td><td>FLYING</td><td>ROCK</td><td>-7.0</td><td>-3.0</td><td>GOLEM:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Yanma</td><td>FLYING</td><td>BUG</td><td>-7.0</td><td>-3.0</td><td>MAGCARGO:ROCK,ROCK </td></tr>
+<tr><td>1</td><td>Lickitung</td><td>GHOST</td><td>NORMAL</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Lickitung</td><td>GHOST</td><td>GRASS</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Lickitung</td><td>PSYCHIC</td><td>NORMAL</td><td>-2.0</td><td>-1.0</td><td>PINSIR:FIGHTING,FIGHTING URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Lickitung</td><td>PSYCHIC</td><td>GRASS</td><td>-2.5</td><td>-1.25</td><td>PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Aipom</td><td>NORMAL</td><td>FLYING</td><td>-2.0</td><td>-1.0</td><td>RHYDON:FIGHTING,BUG RHYDON:FIGHTING,GROUND RHYDON:FIGHTING,ROCK URSARING:FIGHTING,FIGHTING GENGAR:DARK,FIGHTING <br>KABUTOPS:FIGHTING,WATER KABUTOPS:FIGHTING,ROCK SUDOWOODO:FIGHTING,GROUND SUDOWOODO:FIGHTING,ROCK <br></td></tr>
+<tr><td>1</td><td>Aipom</td><td>NORMAL</td><td>FIGHTING</td><td>-3.0</td><td>-1.5</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Aipom</td><td>NORMAL</td><td>NORMAL</td><td>-3.0</td><td>-2.0</td><td>GENGAR:DARK,FIGHTING </td></tr>
+<tr><td>1</td><td>Aipom</td><td>GHOST</td><td>FLYING</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Aipom</td><td>GHOST</td><td>FIGHTING</td><td>-2.5</td><td>-1.0</td><td>HERACROSS:FIGHTING,FIGHTING PINSIR:FIGHTING,FIGHTING </td></tr>
+<tr><td>1</td><td>Aipom</td><td>GHOST</td><td>NORMAL</td><td>-3.0</td><td>-1.5</td><td>URSARING:FIGHTING,FIGHTING </td></tr>
+
+
+	</tbody>
+</table></div>
+
+
+</div>
+
+</body>
+</html>
